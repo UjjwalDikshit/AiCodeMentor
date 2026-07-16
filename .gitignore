@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+**/node_modules/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+REQUIRED_SECRETS/.filled/
+!REQUIRED_SECRETS/README.md
+!REQUIRED_SECRETS/*.example
+
+# Build outputs
+dist/
+build/
+*.egg
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Docker
+*.pid
+
+# Vector DB / local data
+ai-service/data/
+chroma_db/
+*.bin
+
+# Uploads
+backend/uploads/
+!backend/uploads/.gitkeep
+
+# OS
+Desktop.ini

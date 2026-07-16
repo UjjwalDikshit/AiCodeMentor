@@ -1,0 +1,6 @@
+# Optional — GitHub OAuth App credentials
+# Create at: https://github.com/settings/developers
+
+GITHUB_CLIENT_ID=PASTE_GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET=PASTE_GITHUB_CLIENT_SECRET
+GITHUB_CALLBACK_URL=http://localhost:5000/api/v1/github/callback

@@ -1,0 +1,16 @@
+{
+  "name": "codementor-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CodeMentor AI — Your Personal AI Software Engineering Coach (monorepo scaffold)",
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:ai": "cd ai-service && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

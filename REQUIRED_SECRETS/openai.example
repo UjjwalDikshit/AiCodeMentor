@@ -1,0 +1,7 @@
+# Paste your OpenAI API key below, then copy the value into root `.env` as OPENAI_API_KEY=
+# Get a key: https://platform.openai.com/api-keys
+
+OPENAI_API_KEY=sk-PASTE_YOUR_KEY_HERE
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4o-mini
+EMBEDDING_MODEL=text-embedding-3-small

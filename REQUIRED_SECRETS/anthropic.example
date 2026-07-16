@@ -1,0 +1,3 @@
+# Optional — paste Anthropic key if using Claude models
+
+ANTHROPIC_API_KEY=PASTE_YOUR_ANTHROPIC_KEY_HERE

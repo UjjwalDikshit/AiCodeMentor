@@ -1,0 +1,8 @@
+# Docker Compose (service name `mongo`):
+MONGODB_URI=mongodb://mongo:27017/codementor_ai
+
+# Local MongoDB on your machine:
+# MONGODB_URI=mongodb://localhost:27017/codementor_ai
+
+MONGO_INITDB_DATABASE=codementor_ai
+MONGO_PORT=27017
