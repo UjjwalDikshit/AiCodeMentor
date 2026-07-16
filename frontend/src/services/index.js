@@ -9,8 +9,13 @@ export const authService = {
 };
 
 export const userService = {
-  getMe: () => apiClient.get(`${API_PATHS.USER}/me`),
-  updateMe: (payload) => apiClient.patch(`${API_PATHS.USER}/me`, payload),
+  getProfile: () => apiClient.get(`${API_PATHS.USER}/profile`),
+  updateProfile: (payload) => apiClient.patch(`${API_PATHS.USER}/profile`, payload),
+  updatePassword: (payload) => apiClient.patch(`${API_PATHS.USER}/password`, payload),
+  uploadAvatar: (formData) =>
+    apiClient.post(`${API_PATHS.USER}/avatar`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };
 
 export const dashboardService = {

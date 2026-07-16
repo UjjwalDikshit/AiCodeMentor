@@ -1,44 +1,65 @@
 /**
- * JWT auth middleware placeholder.
- * Validates Authorization: Bearer <token> when auth is implemented.
- * Currently a no-op pass-through so routes can be wired early.
+ * JWT authentication and role-based authorization middleware.
  */
 const { env } = require('../config/env');
-const logger = require('../utils/logger');
+const { AppError } = require('../utils/AppError');
+const { verifyAccessToken } = require('../services/token.service');
+const User = require('../models/User.model');
 
-function authenticate(req, _res, next) {
+async function authenticateUser(req, _res, next) {
   const header = req.headers.authorization;
 
-  if (!header) {
-    // Placeholder: do not block until auth is implemented
-    req.user = null;
-    return next();
+  if (!header?.startsWith('Bearer ')) {
+    return next(new AppError('Authentication required', 401));
   }
 
-  const [scheme, token] = header.split(' ');
-  if (scheme !== 'Bearer' || !token) {
-    req.user = null;
-    return next();
+  const token = header.split(' ')[1];
+  if (!token) {
+    return next(new AppError('Authentication required', 401));
   }
 
-  // Placeholder — replace with jwt.verify(token, env.jwt.secret)
-  logger.debug('JWT placeholder received token', {
-    tokenPreview: `${token.slice(0, 8)}...`,
-    secretConfigured: Boolean(env.jwt.secret),
-  });
+  try {
+    const decoded = verifyAccessToken(token);
+    const user = await User.findById(decoded.sub);
 
-  req.user = { id: 'placeholder-user-id', role: 'user' };
-  return next();
+    if (!user) {
+      return next(new AppError('User not found', 401));
+    }
+
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+      email: user.email,
+    };
+
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
 
-function requireAuth(req, res, next) {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: 'Authentication required (placeholder)',
-    });
-  }
-  return next();
+function authorizeRoles(...roles) {
+  return (req, _res, next) => {
+    if (!req.user) {
+      return next(new AppError('Authentication required', 401));
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('Insufficient permissions', 403));
+    }
+
+    return next();
+  };
 }
 
-module.exports = { authenticate, requireAuth };
+/** @deprecated Use authenticateUser */
+const authenticate = authenticateUser;
+/** @deprecated Use authenticateUser */
+const requireAuth = authenticateUser;
+
+module.exports = {
+  authenticateUser,
+  authorizeRoles,
+  authenticate,
+  requireAuth,
+};

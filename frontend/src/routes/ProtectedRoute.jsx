@@ -1,15 +1,40 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROUTES } from '../constants';
+import { PageSkeleton } from '../components/ui/skeleton';
 
-/** Placeholder guard — currently allows all traffic so pages are browsable. */
 export function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  // Soft placeholder: do not hard-block while auth is Coming Soon
-  if (!isAuthenticated && import.meta.env.VITE_ENFORCE_AUTH === 'true') {
+  if (loading) {
+    return (
+      <div className="min-h-screen p-8">
+        <PageSkeleton />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  return children ? children : <Outlet />;
+  return children || <Outlet />;
+}
+
+export function GuestRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <PageSkeleton className="w-full max-w-md" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
+
+  return children || <Outlet />;
 }

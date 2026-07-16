@@ -19,6 +19,16 @@ const env = {
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB) || 10,
   aiServiceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
   aiServiceTimeoutMs: Number(process.env.AI_SERVICE_TIMEOUT_MS) || 60000,
+  cookie: {
+    refreshName: process.env.REFRESH_COOKIE_NAME || 'cm_refresh_token',
+    secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
+    sameSite: process.env.COOKIE_SAME_SITE || 'strict',
+    maxAgeMs: 7 * 24 * 60 * 60 * 1000,
+  },
+  avatar: {
+    maxSizeMb: Number(process.env.AVATAR_MAX_SIZE_MB) || 5,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  },
 };
 
 module.exports = { env };

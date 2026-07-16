@@ -1,19 +1,37 @@
-const { comingSoon } = require('../utils/response');
+/**
+ * User profile HTTP adapters — delegate to user.service.
+ */
+const userService = require('../services/user.service');
+const { success } = require('../utils/response');
 const { asyncHandler } = require('../utils/asyncHandler');
-const placeholderService = require('../services/placeholder.service');
+const { AppError } = require('../utils/AppError');
 
 const userController = {
-  getMe: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('user.me');
-    return comingSoon(res, 'user');
+  getProfile: asyncHandler(async (req, res) => {
+    const user = await userService.getProfile(req.user.id);
+    return success(res, { message: 'Profile retrieved', data: { user } });
   }),
-  updateMe: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('user.update');
-    return comingSoon(res, 'user');
+
+  updateProfile: asyncHandler(async (req, res) => {
+    const user = await userService.updateProfile(req.user.id, req.body);
+    return success(res, { message: 'Profile updated', data: { user } });
   }),
-  getById: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('user.getById');
-    return comingSoon(res, 'user');
+
+  updatePassword: asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const result = await userService.updatePassword(req.user.id, {
+      currentPassword,
+      newPassword,
+    });
+    return success(res, { message: result.message });
+  }),
+
+  uploadAvatar: asyncHandler(async (req, res) => {
+    if (!req.file) {
+      throw new AppError('Avatar file is required', 400);
+    }
+    const user = await userService.updateAvatar(req.user.id, req.file);
+    return success(res, { message: 'Avatar updated', data: { user } });
   }),
 };
 

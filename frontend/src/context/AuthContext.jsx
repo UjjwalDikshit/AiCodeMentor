@@ -1,30 +1,79 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { authService, userService } from '../services';
+import { getAccessToken, setAccessToken, clearAccessToken } from '../lib/token';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem('cm_access_token'));
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const bootstrap = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = getAccessToken();
+
+      if (token) {
+        try {
+          const { data } = await userService.getProfile();
+          setCurrentUser(data.data.user);
+          return;
+        } catch {
+          // Access token may be expired — fall through to refresh
+        }
+      }
+
+      const { data } = await authService.refresh();
+      setAccessToken(data.data.accessToken);
+      setCurrentUser(data.data.user);
+    } catch {
+      clearAccessToken();
+      setCurrentUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    bootstrap();
+  }, [bootstrap]);
+
+  const login = useCallback(async (credentials) => {
+    const { data } = await authService.login(credentials);
+    setAccessToken(data.data.accessToken);
+    setCurrentUser(data.data.user);
+    return data;
+  }, []);
+
+  const register = useCallback(async (payload) => {
+    const { data } = await authService.register(payload);
+    setAccessToken(data.data.accessToken);
+    setCurrentUser(data.data.user);
+    return data;
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
+      clearAccessToken();
+      setCurrentUser(null);
+    }
+  }, []);
 
   const value = useMemo(
     () => ({
-      user,
-      token,
-      isAuthenticated: Boolean(token),
-      // Placeholders — wire to authService when implementing
-      login: async (_credentials) => {
-        setToken('placeholder-token');
-        localStorage.setItem('cm_access_token', 'placeholder-token');
-        setUser({ id: 'placeholder', name: 'Demo User', email: 'demo@codementor.ai' });
-      },
-      logout: () => {
-        setToken(null);
-        setUser(null);
-        localStorage.removeItem('cm_access_token');
-      },
-      setUser,
+      currentUser,
+      user: currentUser,
+      isAuthenticated: Boolean(currentUser),
+      loading,
+      login,
+      logout,
+      register,
+      setCurrentUser,
+      refreshSession: bootstrap,
     }),
-    [user, token]
+    [currentUser, loading, login, logout, register, bootstrap]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

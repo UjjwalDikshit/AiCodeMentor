@@ -1,26 +1,72 @@
 /**
- * Controllers: HTTP adapters only — delegate to services.
+ * Auth HTTP adapters — delegate all logic to auth.service.
  */
-const { comingSoon } = require('../utils/response');
+const authService = require('../services/auth.service');
+const { success } = require('../utils/response');
 const { asyncHandler } = require('../utils/asyncHandler');
-const placeholderService = require('../services/placeholder.service');
+const { setRefreshCookie, clearRefreshCookie } = require('../utils/cookie');
+const { env } = require('../config/env');
 
 const authController = {
-  login: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('auth.login');
-    return comingSoon(res, 'auth');
+  register: asyncHandler(async (req, res) => {
+    const result = await authService.register(req.body);
+    setRefreshCookie(res, result.refreshToken);
+
+    return success(res, {
+      message: 'Registration successful',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+      },
+      statusCode: 201,
+    });
   }),
-  register: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('auth.register');
-    return comingSoon(res, 'auth');
+
+  login: asyncHandler(async (req, res) => {
+    const result = await authService.login(req.body);
+    setRefreshCookie(res, result.refreshToken);
+
+    return success(res, {
+      message: 'Login successful',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+      },
+    });
   }),
-  logout: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('auth.logout');
-    return comingSoon(res, 'auth');
+
+  logout: asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.[env.cookie.refreshName];
+    let userId = req.user?.id;
+
+    if (!userId && refreshToken) {
+      try {
+        const { verifyRefreshToken } = require('../services/token.service');
+        const decoded = verifyRefreshToken(refreshToken);
+        userId = decoded.sub;
+      } catch {
+        // ignore invalid token on logout
+      }
+    }
+
+    await authService.logout(userId);
+    clearRefreshCookie(res);
+
+    return success(res, { message: 'Logged out successfully' });
   }),
-  refresh: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('auth.refresh');
-    return comingSoon(res, 'auth');
+
+  refresh: asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.[env.cookie.refreshName];
+    const result = await authService.refresh(refreshToken);
+    setRefreshCookie(res, result.refreshToken);
+
+    return success(res, {
+      message: 'Token refreshed',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+      },
+    });
   }),
 };
 

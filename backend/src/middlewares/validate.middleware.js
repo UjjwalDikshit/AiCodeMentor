@@ -1,7 +1,19 @@
 /**
- * Request validation middleware factory (Zod-ready).
- * Pass a schema with optional body/query/params when implementing features.
+ * Request validation middleware factory (Zod).
  */
+const { ZodError } = require('zod');
+
+function formatZodErrors(error) {
+  if (!(error instanceof ZodError)) {
+    return [{ message: error.message }];
+  }
+
+  return error.errors.map((err) => ({
+    field: err.path.join('.') || 'body',
+    message: err.message,
+  }));
+}
+
 function validate(schema) {
   return (req, _res, next) => {
     if (!schema) return next();
@@ -15,10 +27,10 @@ function validate(schema) {
       error.statusCode = 422;
       error.isOperational = true;
       error.message = 'Validation failed';
-      error.details = error.errors || error.message;
+      error.details = formatZodErrors(error);
       return next(error);
     }
   };
 }
 
-module.exports = { validate };
+module.exports = { validate, formatZodErrors };

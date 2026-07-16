@@ -2,8 +2,8 @@
  * API route aggregator — mount domain routers under /api/v1.
  */
 const { Router } = require('express');
-const { apiLimiter } = require('../middlewares/rateLimit.middleware');
-const { authenticate } = require('../middlewares/auth.middleware');
+const { apiLimiter, authLimiter } = require('../middlewares/rateLimit.middleware');
+const { authenticateUser } = require('../middlewares/auth.middleware');
 
 const authRoutes = require('./auth.routes');
 const userRoutes = require('./user.routes');
@@ -17,10 +17,11 @@ const progressRoutes = require('./progress.routes');
 
 const router = Router();
 
-router.use(apiLimiter);
-router.use(authenticate);
+router.use('/auth', authLimiter, authRoutes);
 
-router.use('/auth', authRoutes);
+router.use(apiLimiter);
+router.use(authenticateUser);
+
 router.use('/user', userRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/interview', interviewRoutes);
