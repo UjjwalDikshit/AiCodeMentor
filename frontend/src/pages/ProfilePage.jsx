@@ -20,12 +20,10 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
 
   const [name, setName] = useState('');
-  const [currentGoal, setCurrentGoal] = useState('');
 
   useEffect(() => {
     if (profile) {
       setName(profile.name || '');
-      setCurrentGoal(profile.currentGoal || '');
       setCurrentUser(profile);
     }
   }, [profile, setCurrentUser]);
@@ -33,7 +31,7 @@ export default function ProfilePage() {
   async function handleSave(e) {
     e.preventDefault();
     try {
-      const { data } = await updateProfile.mutateAsync({ name: name.trim(), currentGoal: currentGoal.trim() });
+      const { data } = await updateProfile.mutateAsync({ name: name.trim() });
       setCurrentUser(data.data.user);
       toast.success('Profile updated');
     } catch (err) {
@@ -121,14 +119,17 @@ export default function ProfilePage() {
             <FormField label="Email">
               <Input value={profile.email} disabled className="bg-muted" />
             </FormField>
-            <FormField label="Current goal">
-              <Input
-                value={currentGoal}
-                onChange={(e) => setCurrentGoal(e.target.value)}
-                placeholder="e.g. Land a senior SWE role at a FAANG company"
-                disabled={updateProfile.isPending}
-              />
-            </FormField>
+            <p className="text-sm text-muted-foreground">
+              Daily goals and streaks live on the{' '}
+              <Link to={ROUTES.GOALS} className="text-primary hover:underline">
+                Goals
+              </Link>{' '}
+              and{' '}
+              <Link to={ROUTES.PROGRESS} className="text-primary hover:underline">
+                Progress
+              </Link>{' '}
+              pages.
+            </p>
             <Button type="submit" disabled={updateProfile.isPending}>
               {updateProfile.isPending ? 'Saving…' : 'Save changes'}
             </Button>
@@ -139,8 +140,8 @@ export default function ProfilePage() {
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Streak</p>
-            <p className="text-3xl font-bold text-primary">{profile.streak ?? 0}</p>
+            <p className="text-sm text-muted-foreground">Role</p>
+            <p className="text-3xl font-bold text-primary capitalize">{profile.role}</p>
           </CardContent>
         </Card>
         <Card>

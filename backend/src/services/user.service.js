@@ -8,6 +8,7 @@ const { AppError } = require('../utils/AppError');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { toPublicUser } = require('../utils/userSerializer');
 const { sanitizeObject } = require('../utils/sanitize');
+const { writeAudit } = require('./audit.service');
 
 async function getProfile(userId) {
   const user = await User.findById(userId);
@@ -17,10 +18,11 @@ async function getProfile(userId) {
   return toPublicUser(user);
 }
 
-async function updateProfile(userId, { name, currentGoal }) {
+async function updateProfile(userId, { name, currentGoal }, { ip } = {}) {
   const updates = sanitizeObject({ name, currentGoal }, ['name', 'currentGoal']);
   const payload = {};
 
+  // name is profile; currentGoal kept temporarily for backward compatibility only
   if (updates.name !== undefined) payload.name = updates.name;
   if (updates.currentGoal !== undefined) payload.currentGoal = updates.currentGoal;
 
@@ -32,6 +34,13 @@ async function updateProfile(userId, { name, currentGoal }) {
   if (!user) {
     throw new AppError('User not found', 404);
   }
+
+  await writeAudit({
+    userId,
+    action: 'profile_update',
+    details: payload,
+    ip,
+  });
 
   return toPublicUser(user);
 }

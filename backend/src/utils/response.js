@@ -1,11 +1,12 @@
 /**
- * Uniform API response helpers — keep controllers thin and consistent.
+ * Uniform API response helpers — every response includes success, message, data, meta.
  */
-function success(res, { message = 'OK', data = null, statusCode = 200 } = {}) {
+function success(res, { message = 'OK', data = {}, meta = {}, statusCode = 200 } = {}) {
   return res.status(statusCode).json({
     success: true,
     message,
-    ...(data !== null ? { data } : {}),
+    data: data ?? {},
+    meta: meta ?? {},
   });
 }
 
@@ -13,14 +14,17 @@ function comingSoon(res, resource = 'Resource') {
   return res.status(200).json({
     success: true,
     message: 'Coming Soon',
+    data: {},
     meta: { resource },
   });
 }
 
-function fail(res, { message = 'Request failed', statusCode = 400, errors = null } = {}) {
+function fail(res, { message = 'Request failed', statusCode = 400, errors = null, meta = {} } = {}) {
   return res.status(statusCode).json({
     success: false,
     message,
+    data: {},
+    meta: meta ?? {},
     ...(errors ? { errors } : {}),
   });
 }

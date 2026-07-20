@@ -8,10 +8,27 @@ const { hashToken } = require('../utils/tokenHash');
 const { toPublicUser } = require('../utils/userSerializer');
 const { generateTokenPair, verifyRefreshToken } = require('./token.service');
 const { sanitizeObject } = require('../utils/sanitize');
+const progressService = require('./progress.service');
+const achievementService = require('./achievement.service');
+const { createActivity } = require('./activity.service');
 
 async function persistRefreshToken(userId, refreshToken) {
   const hashed = hashToken(refreshToken);
   await User.findByIdAndUpdate(userId, { refreshToken: hashed });
+}
+
+async function bootstrapUserStats(userId) {
+  const progress = await progressService.ensureProgress(userId);
+  await progressService.touchStreak(progress);
+  await progress.save();
+  await achievementService.evaluateAndUnlock(userId, progress);
+  await createActivity({
+    userId,
+    type: 'login',
+    title: 'Signed in',
+    description: 'User authenticated successfully',
+    points: 0,
+  });
 }
 
 async function register({ name, email, password }) {
@@ -33,6 +50,7 @@ async function register({ name, email, password }) {
 
   const tokens = generateTokenPair(user);
   await persistRefreshToken(user._id, tokens.refreshToken);
+  await bootstrapUserStats(user._id);
 
   return {
     user: toPublicUser(user),
@@ -56,6 +74,7 @@ async function login({ email, password }) {
 
   const tokens = generateTokenPair(user);
   await persistRefreshToken(user._id, tokens.refreshToken);
+  await bootstrapUserStats(user._id);
 
   return {
     user: toPublicUser(user),

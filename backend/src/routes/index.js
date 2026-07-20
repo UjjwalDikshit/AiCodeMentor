@@ -14,6 +14,11 @@ const githubRoutes = require('./github.routes');
 const chatRoutes = require('./chat.routes');
 const plannerRoutes = require('./planner.routes');
 const progressRoutes = require('./progress.routes');
+const goalRoutes = require('./goal.routes');
+const activityRoutes = require('./activity.routes');
+const achievementRoutes = require('./achievement.routes');
+const notificationRoutes = require('./notification.routes');
+const analyticsRoutes = require('./analytics.routes');
 
 const router = Router();
 
@@ -24,11 +29,16 @@ router.use(authenticateUser);
 
 router.use('/user', userRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/progress', progressRoutes);
+router.use('/goals', goalRoutes);
+router.use('/activity', activityRoutes);
+router.use('/achievements', achievementRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/analytics', analyticsRoutes);
 router.use('/interview', interviewRoutes);
 router.use('/resume', resumeRoutes);
 router.use('/github', githubRoutes);
 router.use('/chat', chatRoutes);
 router.use('/planner', plannerRoutes);
-router.use('/progress', progressRoutes);
 
 module.exports = router;

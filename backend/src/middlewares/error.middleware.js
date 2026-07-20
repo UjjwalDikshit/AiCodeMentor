@@ -40,6 +40,8 @@ function errorHandler(err, _req, res, _next) {
   res.status(statusCode).json({
     success: false,
     message,
+    data: {},
+    meta: {},
     ...(err.details ? { errors: err.details } : {}),
   });
 }

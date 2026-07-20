@@ -13,7 +13,7 @@ const userController = {
   }),
 
   updateProfile: asyncHandler(async (req, res) => {
-    const user = await userService.updateProfile(req.user.id, req.body);
+    const user = await userService.updateProfile(req.user.id, req.body, { ip: req.ip });
     return success(res, { message: 'Profile updated', data: { user } });
   }),
 

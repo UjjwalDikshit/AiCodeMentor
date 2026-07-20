@@ -22,6 +22,35 @@ export const dashboardService = {
   getOverview: () => apiClient.get(API_PATHS.DASHBOARD),
 };
 
+export const progressService = {
+  get: () => apiClient.get(API_PATHS.PROGRESS),
+  update: (payload) => apiClient.patch(API_PATHS.PROGRESS, payload),
+};
+
+export const goalsService = {
+  list: (params) => apiClient.get(API_PATHS.GOALS, { params }),
+  create: (payload) => apiClient.post(API_PATHS.GOALS, payload),
+  update: (id, payload) => apiClient.patch(`${API_PATHS.GOALS}/${id}`, payload),
+  remove: (id) => apiClient.delete(`${API_PATHS.GOALS}/${id}`),
+};
+
+export const activityService = {
+  list: (params) => apiClient.get(API_PATHS.ACTIVITY, { params }),
+};
+
+export const achievementsService = {
+  list: () => apiClient.get(API_PATHS.ACHIEVEMENTS),
+};
+
+export const notificationsService = {
+  list: (params) => apiClient.get(API_PATHS.NOTIFICATIONS, { params }),
+  markRead: (id) => apiClient.patch(`${API_PATHS.NOTIFICATIONS}/${id}/read`),
+};
+
+export const analyticsService = {
+  get: () => apiClient.get(API_PATHS.ANALYTICS),
+};
+
 export const chatService = {
   list: () => apiClient.get(API_PATHS.CHAT),
   send: (payload) => apiClient.post(API_PATHS.CHAT, payload),
@@ -43,10 +72,6 @@ export const resumeService = {
 export const plannerService = {
   list: () => apiClient.get(API_PATHS.PLANNER),
   create: (payload) => apiClient.post(API_PATHS.PLANNER, payload),
-};
-
-export const progressService = {
-  get: () => apiClient.get(API_PATHS.PROGRESS),
 };
 
 export const githubService = {

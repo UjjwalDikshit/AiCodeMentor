@@ -1,124 +1,140 @@
 import { Link } from 'react-router-dom';
-import { Flame, Target, TrendingUp, User } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Flame, Target, Trophy, Zap } from 'lucide-react';
+import { useDashboard } from '../hooks/useDashboard';
 import { PageSkeleton } from '../components/ui/skeleton';
-import { useAuth } from '../context/AuthContext';
-import { useProfile } from '../hooks/useProfile';
+import { EmptyState, ErrorState, StatCard } from '../components/ui/states';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { ROUTES } from '../constants';
-import { getAvatarUrl } from '../utils/avatar';
+import { useAuth } from '../context/AuthContext';
 
 export default function DashboardPage() {
   const { currentUser } = useAuth();
-  const { data: profile, isLoading } = useProfile();
+  const { data, isLoading, isError, refetch } = useDashboard();
 
-  const user = profile || currentUser;
-  const avatarUrl = getAvatarUrl(user?.avatar);
+  if (isLoading) return <PageSkeleton />;
+  if (isError) return <ErrorState title="Failed to load dashboard" onRetry={refetch} />;
+  if (!data) return <EmptyState title="No dashboard data" description="Seed the database or complete onboarding." />;
 
-  if (isLoading && !user) {
-    return <PageSkeleton />;
-  }
+  const goals = data.todaysGoals?.goals || [];
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={user?.name} className="h-14 w-14 rounded-full object-cover border" />
-          ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
-              {user?.name?.charAt(0)?.toUpperCase() || 'C'}
-            </div>
-          )}
-          <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">
-              Welcome back, {user?.name?.split(' ')[0] || 'Coach'}
-            </h1>
-            <p className="text-muted-foreground">Your personal AI software engineering coach</p>
-          </div>
-        </div>
-        <Link
-          to={ROUTES.PROFILE}
-          className="inline-flex h-10 items-center justify-center rounded-md border bg-transparent px-4 text-sm font-medium hover:bg-secondary"
-        >
-          View profile
-        </Link>
+      <section>
+        <h1 className="font-display text-3xl font-bold tracking-tight">
+          Welcome back, {currentUser?.name?.split(' ')[0] || 'Coach'}
+        </h1>
+        <p className="text-muted-foreground mt-1">Your SaaS coaching command center</p>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={Flame}
-          label="Day streak"
-          value={user?.streak ?? 0}
-          hint="Keep showing up daily"
-        />
-        <StatCard
-          icon={Target}
-          label="Current goal"
-          value={user?.currentGoal ? 'Set' : '—'}
-          hint={user?.currentGoal || 'Define your target role'}
-          smallValue
-        />
-        <StatCard icon={TrendingUp} label="Progress" value="—" hint="Analytics coming soon" />
-        <StatCard
-          icon={User}
-          label="Account"
-          value={user?.isVerified ? 'Verified' : 'Unverified'}
-          hint={`Role: ${user?.role || 'user'}`}
-        />
+        <StatCard icon={Flame} label="Current streak" value={data.streak?.current ?? 0} hint={`Longest: ${data.streak?.longest ?? 0} days`} />
+        <StatCard icon={Zap} label="XP" value={data.xp?.current ?? 0} hint={`Level ${data.xp?.level} · ${data.xp?.rank}`} />
+        <StatCard icon={Trophy} label="Problems solved" value={data.statistics?.totalSolved ?? 0} hint={`${data.statistics?.easySolved}E / ${data.statistics?.mediumSolved}M / ${data.statistics?.hardSolved}H`} />
+        <StatCard icon={Target} label="Today's goals" value={`${data.todaysGoals?.completedGoals ?? 0}/${goals.length}`} hint={`${data.todaysGoals?.completionPercentage ?? 0}% complete`} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Quick actions</CardTitle>
-            <CardDescription>Jump into coaching workflows</CardDescription>
+            <CardTitle>Today&apos;s goals</CardTitle>
+            <CardDescription>Track daily execution</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-2 sm:grid-cols-2">
+          <CardContent className="space-y-2">
+            {goals.length === 0 ? (
+              <EmptyState
+                title="No goals yet"
+                description="Create your first goal for today."
+                action={
+                  <Link to={ROUTES.GOALS} className="text-sm text-primary hover:underline">
+                    Go to Goals
+                  </Link>
+                }
+              />
+            ) : (
+              goals.map((g) => (
+                <div key={g._id} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+                  <span className={g.completed ? 'line-through text-muted-foreground' : ''}>{g.title}</span>
+                  <span className="text-xs uppercase text-muted-foreground">{g.priority}</span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent activity</CardTitle>
+            <CardDescription>Latest coaching signals</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(data.recentActivity || []).slice(0, 6).map((a) => (
+              <div key={a._id} className="rounded-md border px-3 py-2">
+                <p className="text-sm font-medium">{a.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {a.type} · {a.points ? `+${a.points} XP` : 'no XP'} ·{' '}
+                  {new Date(a.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ))}
+            <Link to={ROUTES.ACTIVITY} className="inline-block text-sm text-primary hover:underline pt-2">
+              View all activity
+            </Link>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Scores</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-3 text-sm">
             {[
-              { to: ROUTES.AI_CHAT, label: 'AI Chat' },
-              { to: ROUTES.INTERVIEW, label: 'Mock interview' },
-              { to: ROUTES.RESUME_REVIEW, label: 'Resume review' },
-              { to: ROUTES.PLANNER, label: 'Study planner' },
-            ].map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="rounded-md border px-4 py-3 text-sm font-medium hover:bg-secondary transition-colors"
-              >
-                {item.label}
-              </Link>
+              ['Coding', data.statistics?.codingScore],
+              ['Interview', data.statistics?.interviewScore],
+              ['Resume', data.statistics?.resumeScore],
+              ['GitHub', data.statistics?.githubScore],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-md bg-secondary/50 px-3 py-2">
+                <p className="text-muted-foreground">{label}</p>
+                <p className="text-xl font-semibold">{value ?? 0}</p>
+              </div>
             ))}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Coaching focus</CardTitle>
-            <CardDescription>Your north star for this sprint</CardDescription>
+            <CardTitle>Weak topics</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed">
-              {user?.currentGoal ||
-                'Set a goal on your profile — e.g. "Pass system design rounds at top-tier companies."'}
-            </p>
+          <CardContent className="flex flex-wrap gap-2">
+            {(data.weakTopics || []).length === 0 && <p className="text-sm text-muted-foreground">None yet</p>}
+            {(data.weakTopics || []).map((t) => (
+              <span key={t} className="rounded-full border px-3 py-1 text-xs">
+                {t}
+              </span>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Achievements</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(data.achievements || []).length === 0 && <p className="text-sm text-muted-foreground">No unlocks yet</p>}
+            {(data.achievements || []).map((a) => (
+              <div key={a._id} className="text-sm">
+                <p className="font-medium">{a.title}</p>
+                <p className="text-xs text-muted-foreground">+{a.xpReward} XP</p>
+              </div>
+            ))}
+            <Link to={ROUTES.ACHIEVEMENTS} className="inline-block text-sm text-primary hover:underline">
+              View all
+            </Link>
           </CardContent>
         </Card>
       </section>
     </div>
-  );
-}
-
-function StatCard({ icon: Icon, label, value, hint, smallValue }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-        <p className={`mt-2 font-bold text-primary ${smallValue ? 'text-lg' : 'text-3xl'}`}>{value}</p>
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{hint}</p>
-      </CardContent>
-    </Card>
   );
 }

@@ -1,11 +1,14 @@
-const { comingSoon } = require('../utils/response');
+const dashboardService = require('../services/dashboard.service');
+const { success } = require('../utils/response');
 const { asyncHandler } = require('../utils/asyncHandler');
-const placeholderService = require('../services/placeholder.service');
 
 const dashboardController = {
-  getOverview: asyncHandler(async (_req, res) => {
-    await placeholderService.getComingSoon('dashboard');
-    return comingSoon(res, 'dashboard');
+  getOverview: asyncHandler(async (req, res) => {
+    const data = await dashboardService.getDashboard(req.user.id);
+    return success(res, {
+      message: 'Dashboard retrieved',
+      data,
+    });
   }),
 };
 

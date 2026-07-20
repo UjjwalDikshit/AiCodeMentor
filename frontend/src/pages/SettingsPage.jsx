@@ -10,9 +10,11 @@ import { ROUTES } from '../constants';
 import { useUpdatePasswordMutation } from '../hooks/useProfile';
 import { validatePassword } from '../utils/validation';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function SettingsPage() {
   const { logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const updatePassword = useUpdatePasswordMutation();
   const [form, setForm] = useState({
     currentPassword: '',
@@ -75,6 +77,28 @@ export default function SettingsPage() {
         <h1 className="font-display text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground mt-1">Security and account preferences</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Theme</CardTitle>
+          <CardDescription>Light, dark, or follow system preference</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {['light', 'dark', 'system'].map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setTheme(value)}
+              className={`rounded-md border px-4 py-2 text-sm capitalize ${
+                theme === value ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'
+              }`}
+              aria-pressed={theme === value}
+            >
+              {value}
+            </button>
+          ))}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

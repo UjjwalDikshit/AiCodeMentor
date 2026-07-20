@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 /** Shared placeholder shell for feature pages before business logic ships. */
 export default function ComingSoon({ title, description }) {

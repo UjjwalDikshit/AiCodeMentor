@@ -8,6 +8,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "test:auth": "node scripts/test-auth.js",
+    "seed:dashboard": "node scripts/seed-dashboard.js",
+    "test": "node --test src/utils/level.test.js src/services/goal.service.test.js",
     "lint": "echo \"Lint placeholder — wire ESLint when implementing features\""
   },
   "engines": {
