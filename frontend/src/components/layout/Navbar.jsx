@@ -3,7 +3,7 @@ import { Bell, Moon, Search, Sun, Monitor } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { useNotifications } from '../../hooks/useDashboard';
+import { useMarkNotificationRead, useNotifications } from '../../hooks/useDashboard';
 import { getAvatarUrl } from '../../utils/avatar';
 import { ROUTES } from '../../constants';
 import { cn } from '../../lib/utils';
@@ -12,6 +12,7 @@ export default function Navbar({ onMenuClick }) {
   const { theme, cycleTheme, resolvedTheme } = useTheme();
   const { currentUser } = useAuth();
   const { data: notifData } = useNotifications();
+  const markRead = useMarkNotificationRead();
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
 
@@ -89,9 +90,26 @@ export default function Navbar({ onMenuClick }) {
                   <li className="px-3 py-6 text-center text-sm text-muted-foreground">No notifications</li>
                 )}
                 {notifications.map((n) => (
-                  <li key={n._id} className={cn('rounded-md px-3 py-2 text-sm', !n.isRead && 'bg-secondary/60')}>
-                    <p className="font-medium">{n.title}</p>
-                    <p className="text-xs text-muted-foreground">{n.message}</p>
+                  <li key={n._id}>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className={cn(
+                        'w-full rounded-md px-3 py-2 text-left text-sm hover:bg-secondary',
+                        !n.isRead && 'bg-secondary/60'
+                      )}
+                      onClick={() => {
+                        if (!n.isRead && !String(n._id).startsWith('dummy')) {
+                          markRead.mutate(n._id);
+                        }
+                      }}
+                    >
+                      <p className="font-medium">{n.title}</p>
+                      <p className="text-xs text-muted-foreground">{n.message}</p>
+                      {!n.isRead && (
+                        <p className="mt-1 text-[10px] uppercase tracking-wide text-primary">Unread · click to mark read</p>
+                      )}
+                    </button>
                   </li>
                 ))}
               </ul>

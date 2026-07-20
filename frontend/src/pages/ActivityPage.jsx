@@ -1,11 +1,39 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useActivity } from '../hooks/useDashboard';
 import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
 import { EmptyState, ErrorState } from '../components/ui/states';
+import { Card, CardContent } from '../components/ui/card';
+
+const ACTIVITY_TYPES = [
+  '',
+  'login',
+  'problem_solved',
+  'goal_completed',
+  'goal_created',
+  'interview',
+  'resume_reviewed',
+  'achievement_unlocked',
+  'xp_gained',
+  'progress_updated',
+  'other',
+];
 
 export default function ActivityPage() {
+  const [type, setType] = useState('');
+  const [sort, setSort] = useState('-createdAt');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const filters = useMemo(() => {
+    const next = { sort };
+    if (type) next.type = type;
+    if (startDate) next.startDate = startDate;
+    if (endDate) next.endDate = endDate;
+    return next;
+  }, [type, sort, startDate, endDate]);
+
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useActivity();
+    useActivity(filters);
   const sentinelRef = useRef(null);
 
   useEffect(() => {
@@ -34,11 +62,67 @@ export default function ActivityPage() {
     <div className="space-y-6 max-w-3xl">
       <div>
         <h1 className="font-display text-3xl font-bold">Activity</h1>
-        <p className="text-muted-foreground">Infinite scroll feed of your coaching actions</p>
+        <p className="text-muted-foreground">Filter, sort, and infinite-scroll your feed</p>
       </div>
 
+      <Card>
+        <CardContent className="pt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="text-sm space-y-1">
+            <span className="text-muted-foreground">Type</span>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+              aria-label="Filter by type"
+            >
+              <option value="">All types</option>
+              {ACTIVITY_TYPES.filter(Boolean).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm space-y-1">
+            <span className="text-muted-foreground">Sort</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+              aria-label="Sort activities"
+            >
+              <option value="-createdAt">Newest first</option>
+              <option value="createdAt">Oldest first</option>
+              <option value="-points">Most XP</option>
+              <option value="points">Least XP</option>
+              <option value="type">Type A–Z</option>
+            </select>
+          </label>
+          <label className="text-sm space-y-1">
+            <span className="text-muted-foreground">Start date</span>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+              aria-label="Start date"
+            />
+          </label>
+          <label className="text-sm space-y-1">
+            <span className="text-muted-foreground">End date</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+              aria-label="End date"
+            />
+          </label>
+        </CardContent>
+      </Card>
+
       {activities.length === 0 ? (
-        <EmptyState title="No activity yet" description="Complete goals or update progress to see events." />
+        <EmptyState title="No activity yet" description="Try clearing filters or completing a goal." />
       ) : (
         <ul className="space-y-3">
           {activities.map((a) => (

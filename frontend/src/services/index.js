@@ -32,6 +32,7 @@ export const goalsService = {
   create: (payload) => apiClient.post(API_PATHS.GOALS, payload),
   update: (id, payload) => apiClient.patch(`${API_PATHS.GOALS}/${id}`, payload),
   remove: (id) => apiClient.delete(`${API_PATHS.GOALS}/${id}`),
+  restore: (id) => apiClient.post(`${API_PATHS.GOALS}/${id}/restore`),
 };
 
 export const activityService = {

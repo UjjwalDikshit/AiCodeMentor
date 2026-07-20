@@ -37,6 +37,14 @@ const goalController = {
       data: result,
     });
   }),
+
+  restore: asyncHandler(async (req, res) => {
+    const result = await goalService.restoreGoalItem(req.user.id, req.params.id);
+    return success(res, {
+      message: 'Goal restored',
+      data: result,
+    });
+  }),
 };
 
 module.exports = goalController;

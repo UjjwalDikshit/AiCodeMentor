@@ -55,6 +55,9 @@ const goalIdParamsSchema = {
 const listGoalsSchema = {
   query: z.object({
     date: z.string().optional(),
+    includeDeleted: z
+      .union([z.boolean(), z.enum(['true', 'false'])])
+      .optional(),
   }),
 };
 

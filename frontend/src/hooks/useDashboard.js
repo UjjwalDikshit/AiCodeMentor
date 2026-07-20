@@ -55,6 +55,8 @@ export function useUpdateProgress() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: dashboardKeys.progress });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
+      qc.invalidateQueries({ queryKey: dashboardKeys.analytics });
+      qc.invalidateQueries({ queryKey: dashboardKeys.activity });
     },
   });
 }
@@ -77,6 +79,8 @@ export function useCreateGoal() {
       qc.invalidateQueries({ queryKey: dashboardKeys.goals });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.activity });
+      qc.invalidateQueries({ queryKey: dashboardKeys.analytics });
+      qc.invalidateQueries({ queryKey: dashboardKeys.progress });
     },
   });
 }
@@ -85,26 +89,27 @@ export function useUpdateGoal() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...payload }) => goalsService.update(id, payload).then((r) => r.data),
-    onMutate: async ({ id, completed }) => {
+    onMutate: async ({ id, ...payload }) => {
       await qc.cancelQueries({ queryKey: dashboardKeys.goals });
-      const previous = qc.getQueryData(dashboardKeys.goals);
+      const previousQueries = qc.getQueriesData({ queryKey: dashboardKeys.goals });
       qc.setQueriesData({ queryKey: dashboardKeys.goals }, (old) => {
         if (!Array.isArray(old)) return old;
         return old.map((day) => ({
           ...day,
-          goals: day.goals?.map((g) => (g._id === id ? { ...g, completed } : g)),
+          goals: day.goals?.map((g) => (g._id === id ? { ...g, ...payload } : g)),
         }));
       });
-      return { previous };
+      return { previousQueries };
     },
     onError: (_e, _v, ctx) => {
-      if (ctx?.previous) qc.setQueryData(dashboardKeys.goals, ctx.previous);
+      ctx?.previousQueries?.forEach(([key, data]) => qc.setQueryData(key, data));
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: dashboardKeys.goals });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
       qc.invalidateQueries({ queryKey: dashboardKeys.progress });
       qc.invalidateQueries({ queryKey: dashboardKeys.activity });
+      qc.invalidateQueries({ queryKey: dashboardKeys.analytics });
     },
   });
 }
@@ -123,6 +128,17 @@ export function useDeleteGoal() {
         }));
       });
     },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: dashboardKeys.goals });
+      qc.invalidateQueries({ queryKey: dashboardKeys.all });
+    },
+  });
+}
+
+export function useRestoreGoal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => goalsService.restore(id).then((r) => r.data),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: dashboardKeys.goals });
       qc.invalidateQueries({ queryKey: dashboardKeys.all });
@@ -156,30 +172,42 @@ export function useNotifications() {
   return useQuery({
     queryKey: dashboardKeys.notifications,
     queryFn: async () => {
-      // Backend ready; fall back to empty if unavailable
-      try {
-        const { data } = await notificationsService.list({ page: 1, limit: 10 });
-        return {
-          notifications: data.data.notifications,
-          meta: data.meta,
-        };
-      } catch {
-        return {
-          notifications: [
-            {
-              _id: 'dummy-1',
-              title: 'Welcome',
-              message: 'Notifications API is ready — showing placeholder.',
-              type: 'info',
-              isRead: false,
-              createdAt: new Date().toISOString(),
-            },
-          ],
-          meta: { unreadCount: 1 },
-        };
-      }
+      const { data } = await notificationsService.list({ page: 1, limit: 10 });
+      return {
+        notifications: data.data.notifications,
+        meta: data.meta,
+      };
     },
     refetchInterval: 60_000,
+  });
+}
+
+export function useMarkNotificationRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => notificationsService.markRead(id).then((r) => r.data),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: dashboardKeys.notifications });
+      const previous = qc.getQueryData(dashboardKeys.notifications);
+      qc.setQueryData(dashboardKeys.notifications, (old) => {
+        if (!old) return old;
+        const notifications = old.notifications.map((n) =>
+          n._id === id ? { ...n, isRead: true } : n
+        );
+        const unreadCount = notifications.filter((n) => !n.isRead).length;
+        return {
+          notifications,
+          meta: { ...old.meta, unreadCount },
+        };
+      });
+      return { previous };
+    },
+    onError: (_e, _id, ctx) => {
+      if (ctx?.previous) qc.setQueryData(dashboardKeys.notifications, ctx.previous);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: dashboardKeys.notifications });
+    },
   });
 }
 

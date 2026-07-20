@@ -76,19 +76,6 @@ async function createGoal(userId, { title, priority = 'medium', date } = {}) {
   };
 }
 
-async function listGoals(userId, { date } = {}) {
-  if (date) {
-    const doc = await DailyGoal.findOne({
-      userId,
-      date: startOfDay(new Date(date)),
-    });
-    return { dailyGoals: doc ? [serializeDailyGoal(doc)] : [] };
-  }
-
-  const docs = await DailyGoal.find({ userId }).sort({ date: -1 }).limit(30);
-  return { dailyGoals: docs.map(serializeDailyGoal) };
-}
-
 async function updateGoalItem(userId, goalItemId, updates, { ip } = {}) {
   const doc = await DailyGoal.findOne({ userId, 'goals._id': goalItemId });
   if (!doc) {
@@ -153,12 +140,51 @@ async function softDeleteGoalItem(userId, goalItemId) {
   return { dailyGoal: serializeDailyGoal(doc), goal };
 }
 
-function serializeDailyGoal(doc) {
+function serializeDailyGoal(doc, { includeDeleted = false } = {}) {
   const obj = doc.toObject ? doc.toObject() : doc;
-  return {
+  const payload = {
     ...obj,
     goals: activeGoals(obj),
   };
+  if (includeDeleted) {
+    payload.deletedGoals = obj.goals.filter((g) => g.isDeleted);
+  }
+  return payload;
+}
+
+async function listGoals(userId, { date, includeDeleted } = {}) {
+  const withDeleted = includeDeleted === true || includeDeleted === 'true';
+
+  if (date) {
+    const doc = await DailyGoal.findOne({
+      userId,
+      date: startOfDay(new Date(date)),
+    });
+    return { dailyGoals: doc ? [serializeDailyGoal(doc, { includeDeleted: withDeleted })] : [] };
+  }
+
+  const docs = await DailyGoal.find({ userId }).sort({ date: -1 }).limit(30);
+  return {
+    dailyGoals: docs.map((doc) => serializeDailyGoal(doc, { includeDeleted: withDeleted })),
+  };
+}
+
+async function restoreGoalItem(userId, goalItemId) {
+  const doc = await DailyGoal.findOne({ userId, 'goals._id': goalItemId });
+  if (!doc) {
+    throw new AppError('Goal not found', 404);
+  }
+
+  const goal = doc.goals.id(goalItemId);
+  if (!goal || !goal.isDeleted) {
+    throw new AppError('Deleted goal not found', 404);
+  }
+
+  goal.isDeleted = false;
+  recalculate(doc);
+  await doc.save();
+
+  return { dailyGoal: serializeDailyGoal(doc), goal };
 }
 
 module.exports = {
@@ -167,5 +193,6 @@ module.exports = {
   listGoals,
   updateGoalItem,
   softDeleteGoalItem,
+  restoreGoalItem,
   serializeDailyGoal,
 };
