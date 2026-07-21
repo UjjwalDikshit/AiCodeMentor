@@ -47,4 +47,15 @@ const resumeLimiter = rateLimit({
   },
 });
 
-module.exports = { apiLimiter, authLimiter, chatLimiter, resumeLimiter };
+const codeIntelLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Code intelligence rate limit exceeded — try again shortly',
+  },
+});
+
+module.exports = { apiLimiter, authLimiter, chatLimiter, resumeLimiter, codeIntelLimiter };

@@ -79,6 +79,31 @@ class DummyProvider(BaseAIProvider):
                     "regressed": [],
                     "summary": "Version 2 is stronger.",
                     "echo": last_user[:200],
+                    "strengths": ["Clear structure"],
+                    "weaknesses": ["Nested loops"],
+                    "suggestions": ["Extract helper"],
+                    "alternativeImplementation": "Use a flatter loop or vectorized approach",
+                    "bestPractices": ["Name constants"],
+                    "edgeCases": ["Empty input"],
+                    "interviewDiscussionPoints": ["Time complexity tradeoffs"],
+                    "priorityOrderedFindings": [
+                        {"rule": "nested_loops", "whyItMatters": "Quadratic cost", "fixHint": "Reduce nesting"}
+                    ],
+                    "whatInterviewerMayAsk": ["What is the time complexity?"],
+                    "optimizationQuestions": ["Can you do better than O(n^2)?"],
+                    "followUpQuestions": ["How would you test this?"],
+                    "commonMistakes": ["Off-by-one"],
+                    "expectedAnswers": ["Explain nested loop cost"],
+                    "improvedCode": "# improved\npass\n",
+                    "reason": "Reduce nesting",
+                    "expectedImprovement": "Lower complexity",
+                    "complexityDifference": "O(n^2) -> O(n)",
+                    "riskLevel": "low",
+                    "confidence": 0.75,
+                    "regression": [],
+                    "improvement": ["Clearer naming"],
+                    "breakingChanges": [],
+                    "reviewComments": ["Looks good overall"],
                 }
             )
         else:

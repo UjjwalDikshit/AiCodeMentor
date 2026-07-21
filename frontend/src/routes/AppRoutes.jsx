@@ -60,6 +60,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.RESUME_REVIEW} element={<ResumeReviewPage />} />
         <Route path="/resume/:id" element={<ResumeReviewPage />} />
         <Route path={ROUTES.CODE_REVIEW} element={<CodeReviewPage />} />
+        <Route path="/code-review/:id" element={<CodeReviewPage />} />
         <Route path={ROUTES.INTERVIEW} element={<InterviewPage />} />
         <Route path={ROUTES.GITHUB_REVIEW} element={<GithubReviewPage />} />
         <Route path={ROUTES.PLANNER} element={<PlannerPage />} />

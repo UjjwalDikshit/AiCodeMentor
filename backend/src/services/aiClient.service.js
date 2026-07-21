@@ -66,6 +66,15 @@ module.exports = {
   resumeReport,
   resumeCompare,
   resumeDeleteChunks,
+  codeAnalyze,
+  codeAnalyzeStream,
+  codeComplexity,
+  codeSecurity,
+  codePerformance,
+  codeRefactor,
+  codeInterview,
+  codeDiff,
+  codeDetectLanguage,
   client,
 };
 
@@ -116,5 +125,54 @@ async function resumeCompare(payload) {
 
 async function resumeDeleteChunks(payload) {
   const { data } = await client.post('/resume-intel/chunks/delete', payload);
+  return data;
+}
+
+async function codeAnalyze(payload) {
+  const { data } = await client.post('/code-intel/analyze', payload, { timeout: 180000 });
+  return data;
+}
+
+function codeAnalyzeStream(payload, { signal } = {}) {
+  return client.post('/code-intel/analyze/stream', payload, {
+    responseType: 'stream',
+    timeout: 0,
+    signal,
+    headers: { Accept: 'text/event-stream' },
+  });
+}
+
+async function codeComplexity(payload) {
+  const { data } = await client.post('/code-intel/complexity', payload);
+  return data;
+}
+
+async function codeSecurity(payload) {
+  const { data } = await client.post('/code-intel/security', payload);
+  return data;
+}
+
+async function codePerformance(payload) {
+  const { data } = await client.post('/code-intel/performance', payload);
+  return data;
+}
+
+async function codeRefactor(payload) {
+  const { data } = await client.post('/code-intel/refactor', payload, { timeout: 180000 });
+  return data;
+}
+
+async function codeInterview(payload) {
+  const { data } = await client.post('/code-intel/interview', payload, { timeout: 180000 });
+  return data;
+}
+
+async function codeDiff(payload) {
+  const { data } = await client.post('/code-intel/diff', payload, { timeout: 180000 });
+  return data;
+}
+
+async function codeDetectLanguage(payload) {
+  const { data } = await client.post('/code-intel/detect-language', payload);
   return data;
 }

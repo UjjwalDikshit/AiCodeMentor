@@ -12,6 +12,7 @@ const PromptLibrary = require('./PromptLibrary.model');
 const ChatUsageDaily = require('./ChatUsageDaily.model');
 const Resume = require('./Resume.model');
 const JobDescription = require('./JobDescription.model');
+const CodeReview = require('./CodeReview.model');
 
 module.exports = {
   User,
@@ -28,4 +29,5 @@ module.exports = {
   ChatUsageDaily,
   Resume,
   JobDescription,
+  CodeReview,
 };

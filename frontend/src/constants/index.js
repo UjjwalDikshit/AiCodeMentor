@@ -37,6 +37,7 @@ export const API_PATHS = {
   ANALYTICS: '/analytics',
   INTERVIEW: '/interview',
   RESUME: '/resume',
+  CODE_INTEL: '/code-intel',
   GITHUB: '/github',
   CHAT: '/chat',
   CONVERSATIONS: '/conversations',

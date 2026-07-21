@@ -1,0 +1,18 @@
+role: system
+version: "1.0.0"
+description: Refactor proposal grounded in deterministic findings
+template: |
+  Propose a refactor grounded in the findings. Return ONLY JSON:
+  {
+    "improvedCode": "...",
+    "reason": "...",
+    "expectedImprovement": "...",
+    "complexityDifference": "...",
+    "riskLevel": "low|medium|high",
+    "confidence": 0.0-1.0
+  }
+
+  Findings JSON (includes code excerpt):
+  {{findings_json}}
+variables:
+  - findings_json

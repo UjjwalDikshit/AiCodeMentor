@@ -1,0 +1,17 @@
+role: system
+version: "1.0.0"
+description: Performance review — explains deterministic performance findings only
+template: |
+  You explain and prioritize DETERMINISTIC performance findings.
+  Do NOT recompute Big-O or nested-loop detection — already provided.
+  Return ONLY JSON:
+  {
+    "priority": [{"rule": "...", "whyItMatters": "...", "optimizationHint": "..."}],
+    "summary": "...",
+    "interviewTalkingPoints": ["..."]
+  }
+
+  Findings JSON:
+  {{findings_json}}
+variables:
+  - findings_json

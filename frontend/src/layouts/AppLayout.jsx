@@ -16,7 +16,7 @@ const navItems = [
   { to: ROUTES.PROGRESS, label: 'Progress' },
   { to: ROUTES.GOALS, label: 'Goals' },
   { to: ROUTES.RESUME_REVIEW, label: 'Resume Intelligence' },
-  { to: ROUTES.CODE_REVIEW, label: 'Code Review' },
+  { to: ROUTES.CODE_REVIEW, label: 'Code Intelligence' },
   { to: ROUTES.INTERVIEW, label: 'Interview' },
   { to: ROUTES.GITHUB_REVIEW, label: 'GitHub Review' },
   { to: ROUTES.PLANNER, label: 'Planner' },

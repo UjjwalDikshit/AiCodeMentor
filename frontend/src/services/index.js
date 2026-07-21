@@ -54,6 +54,7 @@ export const analyticsService = {
 
 export { conversationService, chatService } from './chatService';
 export { resumeService } from './resumeService';
+export { codeIntelService } from './codeIntelService';
 
 export const interviewService = {
   list: () => apiClient.get(API_PATHS.INTERVIEW),

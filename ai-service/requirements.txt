@@ -20,4 +20,6 @@ pytest-asyncio==0.25.0
 # Optional in Docker / Linux (requires C++ build tools on some Windows hosts)
 # chromadb==0.5.23
 # Install separately when available: pip install chromadb
-# Without it, VectorStoreService uses an in-memory fallback automatically.
+# Optional: Tree-sitter (heuristic parser is the default fallback)
+# pip install tree-sitter tree-sitter-languages
+

@@ -15,7 +15,4 @@ async def interview_placeholder() -> dict:
 # /resume product placeholder removed — use /resume-intel (Resume Intelligence Platform)
 
 
-@router.post("/code-review")
-@router.post("/code-review/")
-async def code_review_placeholder() -> dict:
-    return coming_soon("code-review")
+# /code-review placeholder removed — use /code-intel (Code Intelligence Platform)

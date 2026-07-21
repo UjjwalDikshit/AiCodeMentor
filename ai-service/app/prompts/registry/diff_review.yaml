@@ -1,0 +1,31 @@
+role: system
+version: "1.0.0"
+description: Diff review using deterministic diff + quality/AST deltas
+template: |
+  Explain the deterministic diff result. Do not re-diff the raw files yourself.
+  Return ONLY JSON:
+  {
+    "added": ["..."],
+    "removed": ["..."],
+    "regression": ["..."],
+    "improvement": ["..."],
+    "breakingChanges": ["..."],
+    "reviewComments": ["..."]
+  }
+
+  Diff JSON:
+  {{diff_json}}
+
+  Old quality:
+  {{old_quality}}
+
+  New quality:
+  {{new_quality}}
+
+  New findings:
+  {{new_findings}}
+variables:
+  - diff_json
+  - old_quality
+  - new_quality
+  - new_findings

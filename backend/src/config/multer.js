@@ -158,4 +158,52 @@ const uploadResume = multer({
   fileFilter: resumeFileFilter,
 });
 
-module.exports = { upload, uploadAvatar, uploadChatAttachment, uploadResume };
+const codeDir = path.resolve(process.cwd(), env.uploadDir, 'code');
+fs.mkdirSync(codeDir, { recursive: true });
+
+const CODE_ALLOWED_EXT = new Set([
+  '.zip',
+  '.py',
+  '.js',
+  '.jsx',
+  '.ts',
+  '.tsx',
+  '.java',
+  '.go',
+  '.rs',
+  '.c',
+  '.cpp',
+  '.cc',
+  '.h',
+  '.hpp',
+  '.cs',
+  '.sql',
+  '.txt',
+  '.md',
+  '.diff',
+  '.patch',
+]);
+
+const codeStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, codeDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  },
+});
+
+function codeFileFilter(_req, file, cb) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (!CODE_ALLOWED_EXT.has(ext)) {
+    return cb(new Error('File type not allowed for code intelligence uploads'));
+  }
+  return cb(null, true);
+}
+
+const uploadCode = multer({
+  storage: codeStorage,
+  limits: { fileSize: env.maxFileSizeMb * 1024 * 1024 },
+  fileFilter: codeFileFilter,
+});
+
+module.exports = { upload, uploadAvatar, uploadChatAttachment, uploadResume, uploadCode };

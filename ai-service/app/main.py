@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import get_settings
 from app.core.logging import setup_logging, get_logger
 from app.core.errors import register_exception_handlers
-from app.routers import health, providers, chat, vector, documents, models, config, legacy, resume_intel
+from app.routers import health, providers, chat, vector, documents, models, config, legacy, resume_intel, code_intel
 
 setup_logging()
 logger = get_logger(__name__)
@@ -46,6 +46,7 @@ app.include_router(documents.router)
 app.include_router(models.router)
 app.include_router(config.router)
 app.include_router(resume_intel.router)
+app.include_router(code_intel.router)
 app.include_router(legacy.router)
 
 
