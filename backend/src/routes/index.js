@@ -12,6 +12,7 @@ const interviewRoutes = require('./interview.routes');
 const resumeRoutes = require('./resume.routes');
 const githubRoutes = require('./github.routes');
 const chatRoutes = require('./chat.routes');
+const conversationRoutes = require('./conversation.routes');
 const plannerRoutes = require('./planner.routes');
 const progressRoutes = require('./progress.routes');
 const goalRoutes = require('./goal.routes');
@@ -39,6 +40,7 @@ router.use('/interview', interviewRoutes);
 router.use('/resume', resumeRoutes);
 router.use('/github', githubRoutes);
 router.use('/chat', chatRoutes);
+router.use('/conversations', conversationRoutes);
 router.use('/planner', plannerRoutes);
 
 module.exports = router;

@@ -7,6 +7,7 @@ from app.pipeline.types import PipelineRequest
 ALLOWED_ROLES = frozenset({"system", "user", "assistant", "developer"})
 ALLOWED_OUTPUT = frozenset({"text", "json", "passthrough"})
 ALLOWED_MEMORY = frozenset({"none", "buffer", "conversation", "window", "summary"})
+ALLOWED_PROVIDERS = frozenset({"dummy", "groq", "ollama"})
 
 
 def validate_pipeline_request(request: PipelineRequest) -> PipelineRequest:
@@ -33,6 +34,12 @@ def validate_pipeline_request(request: PipelineRequest) -> PipelineRequest:
 
     if not request.messages and not request.message:
         raise ValidationError("Provide at least one message or a message string")
+
+    if request.provider is not None:
+        key = str(request.provider).strip().lower()
+        if key and key not in ALLOWED_PROVIDERS:
+            raise ValidationError(f"provider must be one of {sorted(ALLOWED_PROVIDERS)}")
+        request.provider = key or None
 
     if request.output_format not in ALLOWED_OUTPUT:
         raise ValidationError(f"output_format must be one of {sorted(ALLOWED_OUTPUT)}")

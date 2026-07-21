@@ -15,6 +15,7 @@ class PipelineRequest:
     messages: list[dict[str, str]] = field(default_factory=list)
     message: str | None = None
     model: str | None = None
+    provider: str | None = None  # optional override via ProviderFactory
     temperature: float | None = None
     max_tokens: int | None = None
     request_id: str | None = None

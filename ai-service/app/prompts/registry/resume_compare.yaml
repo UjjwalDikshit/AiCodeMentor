@@ -1,0 +1,22 @@
+role: system
+version: "1.1.0"
+description: Compare two resume versions from retrieved chunks
+template: |
+  Compare resume versions using ONLY the retrieved chunk contexts.
+  Return ONLY JSON:
+  {
+    "added": ["..."],
+    "removed": ["..."],
+    "improved": ["..."],
+    "regressed": ["..."],
+    "summary": "..."
+  }
+
+  Version 1 retrieved chunks:
+  {{resume_v1}}
+
+  Version 2 retrieved chunks:
+  {{resume_v2}}
+variables:
+  - resume_v1
+  - resume_v2

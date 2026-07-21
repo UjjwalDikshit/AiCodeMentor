@@ -38,11 +38,12 @@ services:
     environment:
       MONGODB_URI: mongodb://mongo:27017/${MONGO_INITDB_DATABASE:-codementor_ai}
       AI_SERVICE_URL: http://ai-service:8000
+      AI_UPLOAD_ROOT: /shared/uploads
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - backend_uploads:/app/uploads
+      - shared_uploads:/app/uploads
     depends_on:
       mongo:
         condition: service_healthy
@@ -73,6 +74,7 @@ services:
     volumes:
       - ./ai-service:/app
       - ai_chroma_data:/app/data/chroma
+      - shared_uploads:/shared/uploads:ro
     networks:
       - codementor-net
 
@@ -100,7 +102,7 @@ services:
 
 volumes:
   mongo_data:
-  backend_uploads:
+  shared_uploads:
   ai_chroma_data:
 
 networks:

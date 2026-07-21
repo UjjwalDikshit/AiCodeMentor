@@ -1,0 +1,20 @@
+# Auto-generate a short conversation title from the first exchange
+role: system
+version: "1.0.0"
+description: Generate a concise chat title (3–6 words). No quotes. No trailing punctuation.
+template: |
+  You generate short chat titles for CodeMentor AI.
+  Rules:
+  - Output ONLY the title text
+  - 3 to 6 words
+  - No quotes, no markdown, no explanation
+  - Capture the user's topic clearly
+
+  User message:
+  {{user_message}}
+
+  Assistant preview:
+  {{assistant_preview}}
+variables:
+  - user_message
+  - assistant_preview

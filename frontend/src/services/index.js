@@ -52,22 +52,12 @@ export const analyticsService = {
   get: () => apiClient.get(API_PATHS.ANALYTICS),
 };
 
-export const chatService = {
-  list: () => apiClient.get(API_PATHS.CHAT),
-  send: (payload) => apiClient.post(API_PATHS.CHAT, payload),
-};
+export { conversationService, chatService } from './chatService';
+export { resumeService } from './resumeService';
 
 export const interviewService = {
   list: () => apiClient.get(API_PATHS.INTERVIEW),
   create: (payload) => apiClient.post(API_PATHS.INTERVIEW, payload),
-};
-
-export const resumeService = {
-  list: () => apiClient.get(API_PATHS.RESUME),
-  upload: (formData) =>
-    apiClient.post(`${API_PATHS.RESUME}/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
 };
 
 export const plannerService = {

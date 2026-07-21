@@ -13,10 +13,12 @@ class InfraChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(default_factory=list)
     message: str | None = None
     model: str | None = None
+    provider: str | None = None
     use_demo_graph: bool = False
     # Pipeline options (infrastructure)
     system_prompt: str = "system_default"
     prompt_variables: dict[str, Any] = Field(default_factory=dict)
+    skip_system_prompt: bool = False
     memory_kind: Literal["none", "buffer", "conversation", "window", "summary"] = "none"
     memory_window: int = Field(default=10, ge=1, le=100)
     session_id: str | None = None

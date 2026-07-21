@@ -12,10 +12,7 @@ async def interview_placeholder() -> dict:
     return coming_soon("interview")
 
 
-@router.post("/resume")
-@router.post("/resume/")
-async def resume_placeholder() -> dict:
-    return coming_soon("resume")
+# /resume product placeholder removed — use /resume-intel (Resume Intelligence Platform)
 
 
 @router.post("/code-review")

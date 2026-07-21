@@ -10,9 +10,12 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 
 const navItems = [
   { to: ROUTES.DASHBOARD, label: 'Dashboard' },
+  { to: ROUTES.AI_CHAT, label: 'AI Chat' },
+  { to: ROUTES.PROMPT_LIBRARY, label: 'Prompt Library' },
+  { to: ROUTES.CHAT_ANALYTICS, label: 'Chat Analytics' },
   { to: ROUTES.PROGRESS, label: 'Progress' },
   { to: ROUTES.GOALS, label: 'Goals' },
-  { to: ROUTES.RESUME_REVIEW, label: 'Resume Review' },
+  { to: ROUTES.RESUME_REVIEW, label: 'Resume Intelligence' },
   { to: ROUTES.CODE_REVIEW, label: 'Code Review' },
   { to: ROUTES.INTERVIEW, label: 'Interview' },
   { to: ROUTES.GITHUB_REVIEW, label: 'GitHub Review' },

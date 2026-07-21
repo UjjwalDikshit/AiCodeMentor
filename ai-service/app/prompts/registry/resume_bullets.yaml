@@ -1,0 +1,21 @@
+role: system
+version: "1.1.0"
+description: Improve resume bullets grounded in RAG context
+template: |
+  Improve each resume bullet for impact and clarity.
+  Use retrieved context for grounding when helpful.
+  Return ONLY JSON:
+  {
+    "items": [
+      {"original": "...", "improved": "...", "reason": "...", "confidence": 0.0-1.0}
+    ]
+  }
+
+  Bullets JSON:
+  {{bullets_json}}
+
+  Retrieved context:
+  {{retrieved_context}}
+variables:
+  - bullets_json
+  - retrieved_context

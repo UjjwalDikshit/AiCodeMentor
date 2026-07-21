@@ -81,7 +81,11 @@ class ChatInfraService:
         self.prompts = prompts
         self.memory_factory = memory_factory
         self.demo_graph = DemoGraph()
-        self.pipeline = AIExecutionPipeline(settings, provider, prompts, memory_factory)
+        from app.pipeline.middleware import strip_content_post
+
+        self.pipeline = AIExecutionPipeline(
+            settings, provider, prompts, memory_factory
+        ).use_post(strip_content_post)
 
     def _to_pipeline_request(self, **kwargs: Any) -> PipelineRequest:
         messages = list(kwargs.get("messages") or [])
@@ -92,11 +96,13 @@ class ChatInfraService:
             messages=messages,
             message=message,
             model=kwargs.get("model"),
+            provider=kwargs.get("provider"),
             temperature=kwargs.get("temperature"),
             max_tokens=kwargs.get("max_tokens"),
             request_id=kwargs.get("request_id"),
             system_prompt=kwargs.get("system_prompt") or "system_default",
             prompt_variables=kwargs.get("prompt_variables") or {},
+            skip_system_prompt=bool(kwargs.get("skip_system_prompt")),
             memory_kind=kwargs.get("memory_kind") or "none",
             memory_window=int(kwargs.get("memory_window") or 10),
             session_id=kwargs.get("session_id"),
@@ -109,10 +115,12 @@ class ChatInfraService:
         messages: list[dict[str, str]] | None = None,
         message: str | None = None,
         model: str | None = None,
+        provider: str | None = None,
         use_demo_graph: bool = False,
         request_id: str | None = None,
         system_prompt: str = "system_default",
         prompt_variables: dict | None = None,
+        skip_system_prompt: bool = False,
         memory_kind: str = "none",
         memory_window: int = 10,
         session_id: str | None = None,
@@ -134,9 +142,11 @@ class ChatInfraService:
             messages=messages or [],
             message=message,
             model=model,
+            provider=provider,
             request_id=request_id,
             system_prompt=system_prompt,
             prompt_variables=prompt_variables,
+            skip_system_prompt=skip_system_prompt,
             memory_kind=memory_kind,
             memory_window=memory_window,
             session_id=session_id,
@@ -193,9 +203,11 @@ class ChatInfraService:
         messages: list[dict[str, str]] | None = None,
         message: str | None = None,
         model: str | None = None,
+        provider: str | None = None,
         request_id: str | None = None,
         system_prompt: str = "system_default",
         prompt_variables: dict | None = None,
+        skip_system_prompt: bool = False,
         memory_kind: str = "none",
         memory_window: int = 10,
         session_id: str | None = None,
@@ -211,9 +223,11 @@ class ChatInfraService:
                 messages=messages or [],
                 message=message,
                 model=model,
+                provider=provider,
                 request_id=request_id,
                 system_prompt=system_prompt,
                 prompt_variables=prompt_variables,
+                skip_system_prompt=skip_system_prompt,
                 memory_kind=memory_kind,
                 memory_window=memory_window,
                 session_id=session_id,
@@ -265,18 +279,46 @@ class ConfigService:
 
 
 class ModelsService:
+    CATALOG = {
+        "dummy": [{"id": "dummy-echo", "label": "Dummy Echo"}],
+        "groq": [
+            {"id": "llama-3.1-8b-instant", "label": "Llama 3.1 8B Instant"},
+            {"id": "llama-3.3-70b-versatile", "label": "Llama 3.3 70B Versatile"},
+            {"id": "mixtral-8x7b-32768", "label": "Mixtral 8x7B"},
+        ],
+        "ollama": [
+            {"id": "llama3.1", "label": "Llama 3.1"},
+            {"id": "mistral", "label": "Mistral"},
+            {"id": "codellama", "label": "Code Llama"},
+        ],
+    }
+
+    PROMPT_MODES = [
+        {"id": "chat_general", "label": "General Assistant"},
+        {"id": "chat_dsa_mentor", "label": "DSA Mentor"},
+        {"id": "chat_backend_mentor", "label": "Backend Mentor"},
+        {"id": "chat_frontend_mentor", "label": "Frontend Mentor"},
+        {"id": "chat_career_mentor", "label": "Career Mentor"},
+        {"id": "chat_interview_coach", "label": "Interview Coach"},
+        {"id": "chat_system_design", "label": "System Design Mentor"},
+    ]
+
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
 
     def list_models(self) -> dict[str, Any]:
+        active = self.settings.ai_provider
         return ok(
             message="Configured models",
             data={
-                "chat": {"provider": self.settings.ai_provider, "model": self.settings.chat_model},
+                "active": active,
+                "chat": {"provider": active, "model": self.settings.chat_model},
                 "embeddings": {
                     "provider": self.settings.embedding_provider,
                     "model": self.settings.embedding_model,
                 },
+                "providers": self.CATALOG,
+                "promptModes": self.PROMPT_MODES,
             },
         )
 

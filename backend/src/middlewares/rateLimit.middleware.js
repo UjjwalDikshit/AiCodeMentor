@@ -25,4 +25,26 @@ const authLimiter = rateLimit({
   },
 });
 
-module.exports = { apiLimiter, authLimiter };
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Chat rate limit exceeded — try again shortly',
+  },
+});
+
+const resumeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Resume rate limit exceeded — try again shortly',
+  },
+});
+
+module.exports = { apiLimiter, authLimiter, chatLimiter, resumeLimiter };

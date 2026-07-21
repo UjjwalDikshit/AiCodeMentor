@@ -179,11 +179,15 @@ class VectorStoreService:
             raise VectorStoreError(str(exc)) from exc
 
     def delete_document(self, doc_id: str, *, collection: str | None = None) -> dict:
+        return self.delete_documents([doc_id], collection=collection)
+
+    def delete_documents(self, doc_ids: list[str], *, collection: str | None = None) -> dict:
         client = self._get_client()
         coll = client.get_or_create_collection(name=collection or self.default_collection)
         try:
-            coll.delete(ids=[doc_id])
-            return {"deleted": doc_id, "backend": self._backend}
+            if doc_ids:
+                coll.delete(ids=doc_ids)
+            return {"deleted": len(doc_ids), "ids": doc_ids, "backend": self._backend}
         except Exception as exc:  # noqa: BLE001
             raise VectorStoreError(str(exc)) from exc
 

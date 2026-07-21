@@ -127,9 +127,10 @@ class AIExecutionPipeline:
 
             prompt_text = " ".join(m.get("content", "") for m in messages)
             model_name = request.model or self.settings.chat_model
+            active_provider = self._resolve_provider(request)
 
             # ── Provider ────────────────────────────────────────────
-            raw = await self.provider.chat(
+            raw = await active_provider.chat(
                 messages,
                 model=model_name,
                 temperature=request.temperature if request.temperature is not None else self.settings.temperature,
@@ -166,7 +167,7 @@ class AIExecutionPipeline:
                 memory.add("assistant", content if isinstance(content, str) else str(content))
 
             # ── Telemetry ───────────────────────────────────────────
-            provider_name = raw.get("provider", self.provider.name)
+            provider_name = raw.get("provider", active_provider.name)
             resolved_model = raw.get("model", model_name)
             usage = normalize_usage(
                 raw.get("usage"),
@@ -237,6 +238,7 @@ class AIExecutionPipeline:
         prompt_text = ""
         assembled: list[str] = []
         ctx = PipelineContext(request=request, request_id=request_id)
+        active_provider = self.provider
 
         try:
             ctx = await self.middleware.run_pre(ctx)
@@ -254,17 +256,18 @@ class AIExecutionPipeline:
             stages.extend(["prompt_registry", "memory"])
             prompt_text = " ".join(m.get("content", "") for m in messages)
             model_name = request.model or self.settings.chat_model
+            active_provider = self._resolve_provider(request)
 
             yield {
                 "event": "start",
                 "requestId": request_id,
-                "provider": self.provider.name,
+                "provider": active_provider.name,
                 "model": model_name,
                 "stages": list(stages),
                 "timestamp": utc_now_iso(),
             }
 
-            async for chunk in self.provider.stream(messages, model=model_name):
+            async for chunk in active_provider.stream(messages, model=model_name):
                 assembled.append(chunk)
                 yield {"event": "token", "requestId": request_id, "delta": chunk}
 
@@ -276,7 +279,7 @@ class AIExecutionPipeline:
                 content = parsed
             ctx.content = content
             ctx.parsed = parsed
-            ctx.raw = {"content": content, "provider": self.provider.name, "model": model_name}
+            ctx.raw = {"content": content, "provider": active_provider.name, "model": model_name}
             stages.append("output_parser")
 
             ctx = await self.middleware.run_post(ctx)
@@ -297,12 +300,12 @@ class AIExecutionPipeline:
                 None,
                 prompt_text=prompt_text,
                 completion_text=content,
-                provider=self.provider.name,
+                provider=active_provider.name,
             )
             latency = timer.ms()
             log_ai_request(
                 request_id=request_id,
-                provider=self.provider.name,
+                provider=active_provider.name,
                 model=model_name,
                 latency_ms=latency,
                 usage=usage,
@@ -312,7 +315,7 @@ class AIExecutionPipeline:
             yield {
                 "event": "done",
                 "requestId": request_id,
-                "provider": self.provider.name,
+                "provider": active_provider.name,
                 "model": model_name,
                 "latencyMs": round(latency, 2),
                 "usage": usage,
@@ -321,16 +324,26 @@ class AIExecutionPipeline:
                 "stages": stages,
             }
         except Exception as exc:  # noqa: BLE001
-            usage = normalize_usage(None, prompt_text=prompt_text, provider=self.provider.name)
+            usage = normalize_usage(None, prompt_text=prompt_text, provider=active_provider.name)
             log_ai_request(
                 request_id=request_id,
-                provider=self.provider.name,
+                provider=active_provider.name,
                 model=model_name,
                 latency_ms=timer.ms(),
                 usage=usage,
                 error=str(exc),
             )
             yield {"event": "error", "requestId": request_id, "error": str(exc)}
+
+    def _resolve_provider(self, request: PipelineRequest) -> BaseAIProvider:
+        """Use injected provider, or ProviderFactory when request.provider is set."""
+        override = (request.provider or "").strip().lower()
+        if not override or override == self.provider.name:
+            return self.provider
+        from app.providers.factory import ProviderFactory
+
+        clone = self.settings.model_copy(update={"ai_provider": override})
+        return ProviderFactory.create(clone)
 
     def _apply_prompts(self, request: PipelineRequest) -> list[dict[str, str]]:
         msgs = list(request.messages)

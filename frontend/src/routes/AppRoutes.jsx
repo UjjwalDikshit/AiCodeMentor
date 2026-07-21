@@ -15,6 +15,8 @@ import AchievementsPage from '../pages/AchievementsPage';
 import ProfilePage from '../pages/ProfilePage';
 import SettingsPage from '../pages/SettingsPage';
 import AiChatPage from '../pages/AiChatPage';
+import PromptLibraryPage from '../pages/PromptLibraryPage';
+import ChatAnalyticsPage from '../pages/ChatAnalyticsPage';
 import ResumeReviewPage from '../pages/ResumeReviewPage';
 import CodeReviewPage from '../pages/CodeReviewPage';
 import InterviewPage from '../pages/InterviewPage';
@@ -53,14 +55,25 @@ export default function AppRoutes() {
         <Route path={ROUTES.ACHIEVEMENTS} element={<AchievementsPage />} />
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
-        <Route path={ROUTES.AI_CHAT} element={<AiChatPage />} />
+        <Route path={ROUTES.PROMPT_LIBRARY} element={<PromptLibraryPage />} />
+        <Route path={ROUTES.CHAT_ANALYTICS} element={<ChatAnalyticsPage />} />
         <Route path={ROUTES.RESUME_REVIEW} element={<ResumeReviewPage />} />
+        <Route path="/resume/:id" element={<ResumeReviewPage />} />
         <Route path={ROUTES.CODE_REVIEW} element={<CodeReviewPage />} />
         <Route path={ROUTES.INTERVIEW} element={<InterviewPage />} />
         <Route path={ROUTES.GITHUB_REVIEW} element={<GithubReviewPage />} />
         <Route path={ROUTES.PLANNER} element={<PlannerPage />} />
         <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
       </Route>
+
+      <Route
+        path={ROUTES.AI_CHAT}
+        element={
+          <ProtectedRoute>
+            <AiChatPage />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

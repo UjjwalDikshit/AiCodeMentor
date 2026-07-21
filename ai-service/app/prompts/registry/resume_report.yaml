@@ -1,0 +1,23 @@
+role: system
+version: "1.1.0"
+description: Resume intelligence reports from RAG + ATS scores
+template: |
+  Produce resume report summaries from retrieved chunks and optional ATS scores.
+  Return ONLY JSON:
+  {
+    "executiveSummary": "...",
+    "technicalSummary": "...",
+    "recruiterSummary": "...",
+    "strengths": ["..."],
+    "weaknesses": ["..."],
+    "recommendations": ["..."]
+  }
+
+  Retrieved resume chunks:
+  {{retrieved_context}}
+
+  ATS JSON:
+  {{ats_json}}
+variables:
+  - retrieved_context
+  - ats_json

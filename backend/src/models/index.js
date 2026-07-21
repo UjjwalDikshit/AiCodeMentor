@@ -5,6 +5,13 @@ const Activity = require('./Activity.model');
 const Achievement = require('./Achievement.model');
 const Notification = require('./Notification.model');
 const AuditLog = require('./AuditLog.model');
+const Conversation = require('./Conversation.model');
+const Message = require('./Message.model');
+const ChatTemplate = require('./ChatTemplate.model');
+const PromptLibrary = require('./PromptLibrary.model');
+const ChatUsageDaily = require('./ChatUsageDaily.model');
+const Resume = require('./Resume.model');
+const JobDescription = require('./JobDescription.model');
 
 module.exports = {
   User,
@@ -14,4 +21,11 @@ module.exports = {
   Achievement,
   Notification,
   AuditLog,
+  Conversation,
+  Message,
+  ChatTemplate,
+  PromptLibrary,
+  ChatUsageDaily,
+  Resume,
+  JobDescription,
 };

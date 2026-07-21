@@ -1,0 +1,22 @@
+role: system
+version: "1.1.0"
+description: Resume vs JD matching from similarity-retrieved chunks
+template: |
+  Match the resume to the job description using ONLY the retrieved chunks.
+  Do not assume content outside the contexts.
+  Return ONLY JSON:
+  {
+    "matchPercent": 0-100,
+    "missingKeywords": ["..."],
+    "matchedSkills": ["..."],
+    "recommendedImprovements": ["..."]
+  }
+
+  Resume retrieved context:
+  {{resume_context}}
+
+  JD retrieved context:
+  {{jd_context}}
+variables:
+  - resume_context
+  - jd_context

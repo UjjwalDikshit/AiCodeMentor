@@ -14,7 +14,10 @@ export const ROUTES = {
   PROFILE: '/profile',
   SETTINGS: '/settings',
   AI_CHAT: '/chat',
+  PROMPT_LIBRARY: '/prompt-library',
+  CHAT_ANALYTICS: '/chat-analytics',
   RESUME_REVIEW: '/resume',
+  RESUME_DETAIL: '/resume/:id',
   CODE_REVIEW: '/code-review',
   INTERVIEW: '/interview',
   GITHUB_REVIEW: '/github',
@@ -36,5 +39,6 @@ export const API_PATHS = {
   RESUME: '/resume',
   GITHUB: '/github',
   CHAT: '/chat',
+  CONVERSATIONS: '/conversations',
   PLANNER: '/planner',
 };

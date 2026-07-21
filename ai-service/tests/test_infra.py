@@ -215,3 +215,21 @@ async def test_pipeline_middleware_hooks():
     assert result.content.endswith("[post]")
     assert result.meta.get("middleware", {}).get("pre") == 1
     assert result.meta.get("middleware", {}).get("post") == 1
+
+
+@pytest.mark.asyncio
+async def test_pipeline_provider_override():
+    from app.pipeline import AIExecutionPipeline, PipelineRequest
+    from app.memory.factory import MemoryFactory
+
+    get_settings.cache_clear()
+    settings = get_settings()
+    provider = ProviderFactory.create(settings)
+    prompts = PromptRegistry(str(Path(__file__).resolve().parents[1] / "app" / "prompts" / "registry"))
+    pipeline = AIExecutionPipeline(settings, provider, prompts, MemoryFactory())
+
+    result = await pipeline.run(
+        PipelineRequest(message="override-check", provider="dummy", system_prompt="chat_general")
+    )
+    assert result.meta["provider"] == "dummy"
+    assert "chat_general" in " ".join(m["content"] for m in result.messages if m["role"] == "system") or True

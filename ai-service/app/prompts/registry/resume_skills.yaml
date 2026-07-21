@@ -1,0 +1,29 @@
+role: system
+version: "1.1.0"
+description: Skill gap analysis from retrieved chunks
+template: |
+  Analyze skills vs target role using ONLY retrieved resume chunks.
+  Return ONLY JSON:
+  {
+    "missingSkills": ["..."],
+    "weakSkills": ["..."],
+    "strongSkills": ["..."],
+    "emergingSkills": ["..."],
+    "categories": {
+      "Frontend": ["..."],
+      "Backend": ["..."],
+      "Cloud": ["..."],
+      "DevOps": ["..."],
+      "AI": ["..."],
+      "Database": ["..."],
+      "Programming": ["..."]
+    }
+  }
+
+  Target role: {{target_role}}
+
+  Retrieved context:
+  {{retrieved_context}}
+variables:
+  - target_role
+  - retrieved_context
