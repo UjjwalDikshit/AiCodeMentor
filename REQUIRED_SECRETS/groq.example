@@ -1,0 +1,6 @@
+# Paste Groq API key, then copy into root `.env` as GROQ_API_KEY=
+# https://console.groq.com/keys
+
+GROQ_API_KEY=PASTE_GROQ_KEY_HERE
+AI_PROVIDER=groq
+CHAT_MODEL=llama-3.1-8b-instant

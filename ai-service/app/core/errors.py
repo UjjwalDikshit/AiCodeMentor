@@ -1,44 +1,64 @@
-"""Centralized exception handlers + response helpers."""
+"""Exception handlers + response helpers."""
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-
-class AppError(Exception):
-    def __init__(self, message: str, status_code: int = 400) -> None:
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
+from app.core.exceptions import AIServiceError, AppError
 
 
 def coming_soon(resource: str = "resource") -> dict:
     return {
         "success": True,
         "message": "Coming Soon",
-        "meta": {"resource": resource, "service": "ai-service"},
+        "data": {},
+        "meta": {"resource": resource, "service": "ai-service", "layer": "infrastructure"},
+    }
+
+
+def ok(message: str = "OK", data: dict | None = None, meta: dict | None = None) -> dict:
+    return {
+        "success": True,
+        "message": message,
+        "data": data or {},
+        "meta": meta or {},
     }
 
 
 def register_exception_handlers(app: FastAPI) -> None:
+    @app.exception_handler(AIServiceError)
+    async def ai_error_handler(_request: Request, exc: AIServiceError) -> JSONResponse:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "message": exc.message,
+                "data": {},
+                "meta": {"code": exc.code},
+            },
+        )
+
     @app.exception_handler(AppError)
     async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
         return JSONResponse(
             status_code=exc.status_code,
-            content={"success": False, "message": exc.message},
+            content={
+                "success": False,
+                "message": exc.message,
+                "data": {},
+                "meta": {"code": exc.code},
+            },
         )
 
     @app.exception_handler(Exception)
     async def unhandled_error_handler(_request: Request, exc: Exception) -> JSONResponse:
+        from app.config.settings import get_settings
+
+        detail = str(exc) if get_settings().app_env != "production" else None
         return JSONResponse(
             status_code=500,
             content={
                 "success": False,
                 "message": "Internal server error",
-                "detail": str(exc) if get_debug() else None,
+                "data": {},
+                "meta": {"detail": detail},
             },
         )
-
-
-def get_debug() -> bool:
-    from app.core.config import get_settings
-
-    return get_settings().app_env != "production"

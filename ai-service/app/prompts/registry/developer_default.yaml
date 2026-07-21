@@ -1,0 +1,7 @@
+role: developer
+version: "1.0.0"
+description: Developer instructions for infrastructure chat
+template: |
+  Respond briefly. Prefer structured answers. Provider={{provider}}.
+variables:
+  - provider

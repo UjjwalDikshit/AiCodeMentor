@@ -1,0 +1,7 @@
+role: user
+version: "1.0.0"
+description: User message wrapper
+template: |
+  {{message}}
+variables:
+  - message

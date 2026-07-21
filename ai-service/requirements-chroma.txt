@@ -1,0 +1,2 @@
+# Optional heavy deps for production Docker images
+chromadb==0.5.23
